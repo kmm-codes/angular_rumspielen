@@ -1,0 +1,16 @@
+<table>
+    <tr *ngFor="let row of data; index as rowindex;">
+        <td *ngFor="let col of row; index as colindex;">
+            <div [ngClass]="{'dead': col === 0, 'alive' : col === 1 }" class="content"><!--{{rowindex}},{{colindex}}--></div>
+        </td>
+    </tr>
+</table>
+<br>
+<button type="button" class="btn btn-primary" (click)="startClicked()">Start / Stop</button>
+<br>
+<br>
+<label for="inputFieldSize">Feldgröße</label>
+<input [(ngModel)]="fieldSize" type="range" class="form-range" id="inputFieldSize"
+    placeholder="Zahl eingeben" min="10" max="100">
+<div>{{fieldSize}}</div>
+<button type="button" class="btn btn-warning" (click)="makePlayfield()">Generate new field</button>

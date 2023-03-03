@@ -1,0 +1,27 @@
+table {
+    width: 70%;
+  }
+  td {
+    position: relative;
+    border: 1px solid black;
+  }
+  td:after {
+    content: '';
+    display: block;
+    margin-top: 100%;
+  }
+  td .content {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+  }
+
+  .dead{
+    background:gray
+  }
+
+  .alive{
+    background: lightseagreen
+  }
