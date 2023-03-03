@@ -1,35 +1,50 @@
 import { Component, OnInit } from '@angular/core';
 import { isFormArray } from '@angular/forms';
 import { ColdObservable } from 'rxjs/internal/testing/ColdObservable';
-
+import { GolsettingsComponent } from '../golsettings/golsettings.component';
 @Component({
   selector: 'app-canvas',
   templateUrl: './canvas.component.html',
   styleUrls: ['./canvas.component.css']
 })
 export class CanvasComponent implements OnInit {
-  data: number[][];
-  fieldSize = 10;
+  data: boolean[][];
   running = false;
   constructor() {
-    this.data = createSquareMatrix(10);
+    this.data = createSquareMatrix(GolsettingsComponent.fieldSize, true);
   }
-
+  get fieldSize() {
+    return GolsettingsComponent.fieldSize;
+  }
+  set fieldSize(size: number) {
+    GolsettingsComponent.fieldSize = size
+  }
+  get refreshIntervalMs() {
+    return GolsettingsComponent.refreshIntervalMs
+  }
+  set refreshIntervalMs(interval: number) {
+    GolsettingsComponent.refreshIntervalMs = interval
+  }
   makePlayfield() {
-    this.data = createSquareMatrix(this.fieldSize);
+    this.data = createSquareMatrix(GolsettingsComponent.fieldSize, true);
     this.running = false;
   }
-
+  makeEmptyField() {
+    this.data = createSquareMatrix(GolsettingsComponent.fieldSize, false);
+    this.running = false;
+  }
   async engine() {
     while (true) {
       if (this.running) {
         this.step();
       }
-      await delay(200);
+      await delay(GolsettingsComponent.refreshIntervalMs);
     }
   }
 
   step() {
+    let killed = 0;
+    let born = 0;
     let rowIndex = 0;
     let data = this.data;
     var newData = this.data.map(function (arr) {
@@ -42,10 +57,11 @@ export class CanvasComponent implements OnInit {
         let numNeighbors = 0;
         //prüfen ob Zelle lebt
         let cellIsAlive = isAlive(rowIndex, colIndex, data)
-        let cellIsAliveStr = "tot"
+        /*let cellIsAliveStr = "tot"
         if (cellIsAlive > 0) {
           cellIsAliveStr = "lebending"
         }
+        */
         //Zelle links
         numNeighbors += isAlive(rowIndex, colIndex - 1, data)
         //Zelle oben links
@@ -68,17 +84,20 @@ export class CanvasComponent implements OnInit {
         }
 
         //A living cell surrounded by less than 2 living cells will die.
-        if (numNeighbors < 2) {
-          newData[rowIndex][colIndex] = 0;
+        if (cellIsAlive && numNeighbors < 2) {
+          newData[rowIndex][colIndex] = false;
+          killed++;
         }
         //A living cell surrounded by more than 3 living cells will also die.
-        if (numNeighbors > 3) {
-          newData[rowIndex][colIndex] = 0;
+        if (cellIsAlive && numNeighbors > 3) {
+          newData[rowIndex][colIndex] = false;
+          killed++;
         }
         //A dead cell surrounded by 3 living cells will be reborn.
         if (!cellIsAlive && numNeighbors === 3) {
-          console.log(`Erwecke Zelle ${rowIndex},${colIndex} zum leben`)
-          newData[rowIndex][colIndex] = 1;
+          //console.log(`Erwecke Zelle ${rowIndex},${colIndex} zum leben`)
+          newData[rowIndex][colIndex] = true;
+          born++;
         }
 
         colIndex++;
@@ -86,10 +105,15 @@ export class CanvasComponent implements OnInit {
       rowIndex++;
     });
 
-
+    if (born === 0 && killed === 0) {
+      this.running = false;
+    }
     this.data = newData;
   }
 
+  toggleField(rowindex: number, colindex: number) {
+    this.data[rowindex][colindex] = !this.data[rowindex][colindex]
+  }
   startClicked() {
     this.running = !this.running;
   }
@@ -98,13 +122,13 @@ export class CanvasComponent implements OnInit {
     this.engine();
   }
 }
-function isAlive(rowIndex: number, colIndex: number, data: number[][]): number {
+function isAlive(rowIndex: number, colIndex: number, data: boolean[][]): number {
   //console.log("check isAlive for " + rowIndex + "," + colIndex)
   if (rowIndex < 0 || colIndex < 0 || rowIndex > data.length - 1 || colIndex > data.length - 1) {
     //console.log("out of bounds")
     return 0;
   }
-  if (data[rowIndex][colIndex] == 1) {
+  if (data[rowIndex][colIndex] == true) {
     //console.log("alive")
     return 1
   }
@@ -112,12 +136,16 @@ function isAlive(rowIndex: number, colIndex: number, data: number[][]): number {
   return 0;
 }
 
-function createSquareMatrix(size: number) {
-  var result: number[][] = [];
+function createSquareMatrix(size: number, randomized: boolean) {
+  var result: boolean[][] = [];
   for (var i = 0; i < size; i++) {
     result[i] = [];
     for (var j = 0; j < size; j++) {
-      result[i][j] = Math.floor(Math.random() * 2);
+      if (randomized) {
+        result[i][j] = Boolean(Math.floor(Math.random() * 2));
+      } else {
+        result[i][j] = false;
+      }
     }
   }
   return result;

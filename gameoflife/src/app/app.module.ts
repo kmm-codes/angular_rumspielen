@@ -6,11 +6,13 @@ import { AppComponent } from './app.component';
 import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
 import { CanvasComponent } from './canvas/canvas.component';
 import { FormsModule } from '@angular/forms';
+import { GolsettingsComponent } from './golsettings/golsettings.component';
 
 @NgModule({
   declarations: [
     AppComponent,
-    CanvasComponent
+    CanvasComponent,
+    GolsettingsComponent
   ],
   imports: [
     BrowserModule,

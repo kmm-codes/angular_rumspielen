@@ -1,27 +1,55 @@
 table {
-    width: 70%;
-  }
-  td {
-    position: relative;
-    border: 1px solid black;
-  }
-  td:after {
-    content: '';
-    display: block;
-    margin-top: 100%;
-  }
-  td .content {
-    position: absolute;
-    top: 0;
-    bottom: 0;
-    left: 0;
-    right: 0;
-  }
+  width: 40%;
+}
 
-  .dead{
-    background:gray
-  }
+td {
+  position: relative;
+  border: 1px solid black;
+}
 
-  .alive{
-    background: lightseagreen
-  }
+td:after {
+  content: '';
+  display: block;
+  margin-top: 100%;
+}
+
+td .content {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+}
+
+.dead {
+  background: rgba(75, 75, 75, 0.369);
+  border: 0;
+}
+
+.alive {
+  background: rgb(33, 177, 54);
+  border:0;
+}
+
+#settingsContainer {
+  width: 40%;
+  float: left;
+}
+
+.buttonrow {
+  float: left;
+
+}
+
+.top-buffer {
+  margin-top: 10px;
+}
+
+.bd-highlight {
+  background-color: rgba(86, 61, 124, 0.15);
+  border: 1px solid rgba(86, 61, 124, 0.15);
+}
+
+.mybutton {
+  width: 50%;
+}

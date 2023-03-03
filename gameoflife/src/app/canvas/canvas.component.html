@@ -1,16 +1,55 @@
 <table>
     <tr *ngFor="let row of data; index as rowindex;">
         <td *ngFor="let col of row; index as colindex;">
-            <div [ngClass]="{'dead': col === 0, 'alive' : col === 1 }" class="content"><!--{{rowindex}},{{colindex}}--></div>
+            <div [ngClass]="{'dead': col === false, 'alive' : col === true }" class="content"
+            (click)="toggleField(rowindex, colindex)">
+            </div>
         </td>
     </tr>
 </table>
-<br>
-<button type="button" class="btn btn-primary" (click)="startClicked()">Start / Stop</button>
-<br>
-<br>
-<label for="inputFieldSize">Feldgröße</label>
-<input [(ngModel)]="fieldSize" type="range" class="form-range" id="inputFieldSize"
-    placeholder="Zahl eingeben" min="10" max="100">
-<div>{{fieldSize}}</div>
-<button type="button" class="btn btn-warning" (click)="makePlayfield()">Generate new field</button>
+<div class="container" id="settingsContainer">
+    <div class="row top-buffer">
+        <div class="col-6">
+            <button type="button" class="btn btn-primary mybutton" (click)="startClicked()">Start / Stop</button>
+        </div>
+        <div *ngIf="running===true" class="col">
+            <span class="badge text-bg-primary">Running</span>
+        </div>
+        <div *ngIf="running===false" class="col">
+            <span class="badge text-bg-secondary">Stopped</span>
+        </div>
+    </div>
+    <div class="row top-buffer">
+        <div class="col">
+            <button type="button" class="btn btn-warning mybutton" (click)="makePlayfield()">Generate random
+                field</button>
+        </div>
+        <div class="col">
+            <button type="button" class="btn btn-warning mybutton" (click)="makeEmptyField()">Generate empty
+                field</button>
+        </div>
+
+    </div>
+    <div class="row top-buffer">
+        <label for="inputFieldSize">Feldgröße</label>
+    </div>
+    <div class="row">
+        <input [(ngModel)]="fieldSize" type="range" class="form-range" id="inputFieldSize" placeholder="Zahl eingeben"
+            min="10" max="100">
+    </div>
+    <div class="row">
+        <div>{{fieldSize}}</div>
+
+    </div>
+    <div class="row top-buffer">
+        <label for="inputUpdateInterval">Aktualisierungsrate in ms</label>
+    </div>
+    <div class="row">
+        <input [(ngModel)]="refreshIntervalMs" type="range" class="form-range" id="inputUpdateInterval"
+            placeholder="Zahl eingeben" min="1" max="1000">
+    </div>
+    <div class="row">
+        <div>{{refreshIntervalMs}}</div>
+
+    </div>
+</div>
