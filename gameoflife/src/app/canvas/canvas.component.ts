@@ -1,17 +1,36 @@
-import { Component, OnInit } from '@angular/core';
+import { AfterViewInit, Component, ElementRef, OnInit, ViewChild } from '@angular/core';
 import { isFormArray } from '@angular/forms';
 import { ColdObservable } from 'rxjs/internal/testing/ColdObservable';
+import { ActualcanvasComponent } from '../actualcanvas/actualcanvas.component';
 import { GolsettingsComponent } from '../golsettings/golsettings.component';
 @Component({
   selector: 'app-canvas',
   templateUrl: './canvas.component.html',
   styleUrls: ['./canvas.component.css']
 })
-export class CanvasComponent implements OnInit {
+export class CanvasComponent implements OnInit, AfterViewInit {
+  @ViewChild('myCanvas')
+  private canvas: ElementRef = {} as ElementRef;
+  private context!: CanvasRenderingContext2D;
+  actualcanvas!: ElementRef;
   data: boolean[][];
+  rectSize = 50;
+  canvasDrawBorder = true;
+  SettingCanvasRectsSpaceBetween = 1;
+  canvasRectsSpaceBetween = 1;
+  canvasRectsX = 10;
+  canvasRectsY = 10;
+  canvasHeight = 500;
+  canvasWidth = 500;
   running = false;
+  canvasHeightWithSpaces = 500;
+  canvasWidthWithSpaces = 500;
   constructor() {
     this.data = createSquareMatrix(GolsettingsComponent.fieldSize, true);
+  }
+  ngAfterViewInit(): void {
+    this.context = this.canvas.nativeElement.getContext('2d');
+    this.drawGridOnCanvas();
   }
   get fieldSize() {
     return GolsettingsComponent.fieldSize;
@@ -28,10 +47,12 @@ export class CanvasComponent implements OnInit {
   makePlayfield() {
     this.data = createSquareMatrix(GolsettingsComponent.fieldSize, true);
     this.running = false;
+    this.drawGridOnCanvas();
   }
   makeEmptyField() {
     this.data = createSquareMatrix(GolsettingsComponent.fieldSize, false);
     this.running = false;
+    this.drawGridOnCanvas();
   }
   async engine() {
     while (true) {
@@ -39,6 +60,77 @@ export class CanvasComponent implements OnInit {
         this.step();
       }
       await delay(GolsettingsComponent.refreshIntervalMs);
+    }
+  }
+
+  fixCanvas() {
+    let dpi: number = 1;
+    var win: any = window;
+
+    //get DPI
+    if (win.devicePixelRatio) {
+      //dpi = win.devicePixelRatio
+    }
+    //get canvas
+    let canvas = document.getElementById('myCanvas')!;
+
+    //get CSS height
+    //the + prefix casts it to an integer
+    //the slice method gets rid of "px"
+    let style_height = +getComputedStyle(canvas).getPropertyValue("height").slice(0, -2);
+    //get CSS width
+    let style_width = +getComputedStyle(canvas).getPropertyValue("width").slice(0, -2);
+    //scale the canvas
+    //canvas.setAttribute('height', (style_height * dpi).toString());
+    this.canvas.nativeElement.height = style_height * dpi
+    this.canvas.nativeElement.width = style_width * dpi
+  }
+
+  drawBorderChanged() {
+    if (this.canvasDrawBorder) {
+
+    }
+  }
+
+  calculateCanvasDimensions() {
+    this.canvasRectsX = this.data.length
+    this.canvasRectsY = this.data[0].length
+    this.rectSize = Math.round((this.canvasHeight / this.canvasRectsY))
+    this.canvasHeightWithSpaces = this.canvasRectsY * (this.rectSize + this.canvasRectsSpaceBetween);
+    this.canvasWidthWithSpaces = this.canvasRectsX * (this.rectSize + this.canvasRectsSpaceBetween);
+    this.canvas.nativeElement.height = this.canvasHeightWithSpaces;
+    this.canvas.nativeElement.width = this.canvasWidthWithSpaces;
+  }
+  drawGridOnCanvas() {
+    var color_dead = "#A0A0A0"
+    var color_alive = "#0094FF"
+    var color_background = "#000000"
+    this.calculateCanvasDimensions()
+    this.context.lineWidth = 0.2;
+    //fix blurryness
+    //this.fixCanvas()
+
+    //draw background
+    if (this.canvasDrawBorder) {
+      this.context.fillStyle = color_background;
+      this.context.fillRect(0, 0, this.canvasHeightWithSpaces, this.canvasWidthWithSpaces);
+      this.canvasRectsSpaceBetween = this.SettingCanvasRectsSpaceBetween;
+    } else {
+      this.canvasRectsSpaceBetween = 0;
+    }
+
+    this.calculateCanvasDimensions()
+
+    for (var i = 0; i < this.canvasRectsX; i++) {
+      for (var j = 0; j < this.canvasRectsY; j++) {
+        this.context.beginPath();
+        this.context.fillStyle = color_dead;
+        if (this.data[i][j]) {
+          this.context.fillStyle = color_alive;
+        }
+        this.context.fillRect(j * Math.round((this.rectSize + this.canvasRectsSpaceBetween)), i * Math.round((this.rectSize + this.canvasRectsSpaceBetween)), Math.round(this.rectSize), Math.round(this.rectSize));
+        this.context.stroke();
+      }
     }
   }
 
@@ -51,7 +143,6 @@ export class CanvasComponent implements OnInit {
       return arr.slice();
     });
     this.data.forEach(function (row) {
-
       let colIndex = 0;
       row.forEach(function (col) {
         let numNeighbors = 0;
@@ -99,7 +190,6 @@ export class CanvasComponent implements OnInit {
           newData[rowIndex][colIndex] = true;
           born++;
         }
-
         colIndex++;
       })
       rowIndex++;
@@ -109,10 +199,12 @@ export class CanvasComponent implements OnInit {
       this.running = false;
     }
     this.data = newData;
+    this.drawGridOnCanvas();
   }
 
   toggleField(rowindex: number, colindex: number) {
     this.data[rowindex][colindex] = !this.data[rowindex][colindex]
+    this.drawGridOnCanvas();
   }
   startClicked() {
     this.running = !this.running;
@@ -142,7 +234,12 @@ function createSquareMatrix(size: number, randomized: boolean) {
     result[i] = [];
     for (var j = 0; j < size; j++) {
       if (randomized) {
-        result[i][j] = Boolean(Math.floor(Math.random() * 2));
+        var isAlive = Boolean(Math.floor(Math.random() * 2));
+        if (isAlive) {
+          //nochmal würfeln, damit nicht zu viele Zellen lebendig sind
+          isAlive = Boolean(Math.floor(Math.random() * 2));
+        }
+        result[i][j] = isAlive;
       } else {
         result[i][j] = false;
       }

@@ -7,12 +7,14 @@ import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
 import { CanvasComponent } from './canvas/canvas.component';
 import { FormsModule } from '@angular/forms';
 import { GolsettingsComponent } from './golsettings/golsettings.component';
+import { ActualcanvasComponent } from './actualcanvas/actualcanvas.component';
 
 @NgModule({
   declarations: [
     AppComponent,
     CanvasComponent,
-    GolsettingsComponent
+    GolsettingsComponent,
+    ActualcanvasComponent
   ],
   imports: [
     BrowserModule,

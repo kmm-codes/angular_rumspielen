@@ -1,12 +1,13 @@
-<table>
+<canvas height="1000px" width="1000px" #myCanvas id="myCanvas"></canvas>
+<!--table>
     <tr *ngFor="let row of data; index as rowindex;">
-        <td *ngFor="let col of row; index as colindex;">
-            <div [ngClass]="{'dead': col === false, 'alive' : col === true }" class="content"
-            (click)="toggleField(rowindex, colindex)">
+        <td (click)="toggleField(rowindex, colindex)" *ngFor="let col of row; index as colindex;">
+            <div [ngClass]="{'dead': col === false, 'alive' : col === true }" class="content">
             </div>
         </td>
     </tr>
-</table>
+</table-->
+<hr>
 <div class="container" id="settingsContainer">
     <div class="row top-buffer">
         <div class="col-6">
@@ -50,6 +51,28 @@
     </div>
     <div class="row">
         <div>{{refreshIntervalMs}}</div>
-
     </div>
+    <div class="row top-buffer">
+        <label for="inputUpdateInterval">Abstand der Rechtecke</label>
+    </div>
+    <div class="row">
+        <input [(ngModel)]="SettingCanvasRectsSpaceBetween" type="range" class="form-range" id="inputUpdateInterval"
+            placeholder="Zahl eingeben" min="0" max="4" (change)="drawGridOnCanvas()">
+    </div>
+    <div class="row">
+        <div>{{SettingCanvasRectsSpaceBetween}}</div>
+    </div>
+    <div class="row top-buffer">
+        <div class="col-6">
+            <label for="inputUpdateInterval">Zeichne Rahmen</label>
+        </div>
+        <div class="col-6">
+            <input [(ngModel)]="canvasDrawBorder" type="checkbox" class="checkbox" id="inputCanvasDrawBorder"
+                (change)="drawGridOnCanvas()" placeholder="Zahl eingeben" min="1" max="1000">
+        </div>
+    </div>
+    <div class="row">
+        <br>
+    </div>
+
 </div>
