@@ -25,18 +25,26 @@ export class CanvasComponent implements OnInit, AfterViewInit {
   running = false;
   canvasHeightWithSpaces = 500;
   canvasWidthWithSpaces = 500;
+  renderTypeTable = false;
+  renderTypeCanvas = true;
   constructor() {
-    this.data = createSquareMatrix(GolsettingsComponent.fieldSize, true);
+    this.data = createSquareMatrix(GolsettingsComponent.fieldSizeX, GolsettingsComponent.fieldSizeY, true);
   }
   ngAfterViewInit(): void {
     this.context = this.canvas.nativeElement.getContext('2d');
     this.drawGridOnCanvas();
   }
-  get fieldSize() {
-    return GolsettingsComponent.fieldSize;
+  get fieldSizeX() {
+    return GolsettingsComponent.fieldSizeX;
   }
-  set fieldSize(size: number) {
-    GolsettingsComponent.fieldSize = size
+  set fieldSizeX(size: number) {
+    GolsettingsComponent.fieldSizeX = size
+  }
+  get fieldSizeY() {
+    return GolsettingsComponent.fieldSizeY;
+  }
+  set fieldSizeY(size: number) {
+    GolsettingsComponent.fieldSizeY = size
   }
   get refreshIntervalMs() {
     return GolsettingsComponent.refreshIntervalMs
@@ -45,12 +53,12 @@ export class CanvasComponent implements OnInit, AfterViewInit {
     GolsettingsComponent.refreshIntervalMs = interval
   }
   makePlayfield() {
-    this.data = createSquareMatrix(GolsettingsComponent.fieldSize, true);
+    this.data = createSquareMatrix(GolsettingsComponent.fieldSizeX, GolsettingsComponent.fieldSizeY, true);
     this.running = false;
     this.drawGridOnCanvas();
   }
   makeEmptyField() {
-    this.data = createSquareMatrix(GolsettingsComponent.fieldSize, false);
+    this.data = createSquareMatrix(GolsettingsComponent.fieldSizeX, GolsettingsComponent.fieldSizeY, false);
     this.running = false;
     this.drawGridOnCanvas();
   }
@@ -63,29 +71,6 @@ export class CanvasComponent implements OnInit, AfterViewInit {
     }
   }
 
-  fixCanvas() {
-    let dpi: number = 1;
-    var win: any = window;
-
-    //get DPI
-    if (win.devicePixelRatio) {
-      //dpi = win.devicePixelRatio
-    }
-    //get canvas
-    let canvas = document.getElementById('myCanvas')!;
-
-    //get CSS height
-    //the + prefix casts it to an integer
-    //the slice method gets rid of "px"
-    let style_height = +getComputedStyle(canvas).getPropertyValue("height").slice(0, -2);
-    //get CSS width
-    let style_width = +getComputedStyle(canvas).getPropertyValue("width").slice(0, -2);
-    //scale the canvas
-    //canvas.setAttribute('height', (style_height * dpi).toString());
-    this.canvas.nativeElement.height = style_height * dpi
-    this.canvas.nativeElement.width = style_width * dpi
-  }
-
   drawBorderChanged() {
     if (this.canvasDrawBorder) {
 
@@ -93,8 +78,10 @@ export class CanvasComponent implements OnInit, AfterViewInit {
   }
 
   calculateCanvasDimensions() {
-    this.canvasRectsX = this.data.length
-    this.canvasRectsY = this.data[0].length
+    this.canvasRectsX = this.data[0].length
+    this.canvasRectsY = this.data.length
+    //console.log(`canvasRectsX = ${this.canvasRectsX}`)
+    //console.log(`canvasRectsY = ${this.canvasRectsY}`)
     this.rectSize = Math.round((this.canvasHeight / this.canvasRectsY))
     this.canvasHeightWithSpaces = this.canvasRectsY * (this.rectSize + this.canvasRectsSpaceBetween);
     this.canvasWidthWithSpaces = this.canvasRectsX * (this.rectSize + this.canvasRectsSpaceBetween);
@@ -121,8 +108,8 @@ export class CanvasComponent implements OnInit, AfterViewInit {
 
     this.calculateCanvasDimensions()
 
-    for (var i = 0; i < this.canvasRectsX; i++) {
-      for (var j = 0; j < this.canvasRectsY; j++) {
+    for (var i = 0; i < this.canvasRectsY; i++) {
+      for (var j = 0; j < this.canvasRectsX; j++) {
         this.context.beginPath();
         this.context.fillStyle = color_dead;
         if (this.data[i][j]) {
@@ -137,22 +124,21 @@ export class CanvasComponent implements OnInit, AfterViewInit {
   step() {
     let killed = 0;
     let born = 0;
-    let rowIndex = 0;
     let data = this.data;
     var newData = this.data.map(function (arr) {
       return arr.slice();
     });
-    this.data.forEach(function (row) {
-      let colIndex = 0;
-      row.forEach(function (col) {
+    for (let rowIndex = 0; rowIndex < this.data.length; rowIndex++) {
+      for (let colIndex = 0; colIndex < this.data[0].length; colIndex++) {
+        console.log(`colIndex:${colIndex}, rowIndex:${rowIndex}`)
         let numNeighbors = 0;
         //prüfen ob Zelle lebt
         let cellIsAlive = isAlive(rowIndex, colIndex, data)
-        /*let cellIsAliveStr = "tot"
+        let cellIsAliveStr = "tot"
         if (cellIsAlive > 0) {
           cellIsAliveStr = "lebending"
         }
-        */
+
         //Zelle links
         numNeighbors += isAlive(rowIndex, colIndex - 1, data)
         //Zelle oben links
@@ -171,7 +157,9 @@ export class CanvasComponent implements OnInit, AfterViewInit {
         numNeighbors += isAlive(rowIndex + 1, colIndex + 1, data)
 
         if (numNeighbors > 0) {
-          //console.log(`Die Zelle ${rowIndex},${colIndex} ist ${cellIsAliveStr} und hat ${numNeighbors} lebende Nachbarn`)
+          console.log(`Die Zelle ${rowIndex},${colIndex} ist ${cellIsAliveStr} und hat ${numNeighbors} lebende Nachbarn`)
+        } else {
+          //console.log(`Die Zelle ${rowIndex},${colIndex} ist ${cellIsAliveStr} und hat 0 lebende Nachbarn`)
         }
 
         //A living cell surrounded by less than 2 living cells will die.
@@ -190,10 +178,8 @@ export class CanvasComponent implements OnInit, AfterViewInit {
           newData[rowIndex][colIndex] = true;
           born++;
         }
-        colIndex++;
-      })
-      rowIndex++;
-    });
+      }
+    };
 
     if (born === 0 && killed === 0) {
       this.running = false;
@@ -212,6 +198,31 @@ export class CanvasComponent implements OnInit, AfterViewInit {
 
   ngOnInit(): void {
     this.engine();
+    //this.test();
+  }
+
+  test() {
+    // Create circle
+    const circle = new Path2D();
+    circle.arc(150, 75, 50, 0, 2 * Math.PI);
+    this.context.fillStyle = 'red';
+    this.context.fill(circle);
+    var ctx = this.context
+    var canvas = this.canvas.nativeElement
+    // Listen for mouse moves
+    canvas.nativeElement.addEventListener('mousemove', function (event: any) {
+      // Check whether point is inside circle
+      if (ctx.isPointInPath(circle, event.offsetX, event.offsetY)) {
+        ctx.fillStyle = 'green';
+      }
+      else {
+        ctx.fillStyle = 'red';
+      }
+
+      // Draw circle
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      ctx.fill(circle);
+    });
   }
 }
 function isAlive(rowIndex: number, colIndex: number, data: boolean[][]): number {
@@ -228,11 +239,11 @@ function isAlive(rowIndex: number, colIndex: number, data: boolean[][]): number 
   return 0;
 }
 
-function createSquareMatrix(size: number, randomized: boolean) {
+function createSquareMatrix(sizeX: number, sizeY: number, randomized: boolean) {
   var result: boolean[][] = [];
-  for (var i = 0; i < size; i++) {
+  for (var i = 0; i < sizeY; i++) {
     result[i] = [];
-    for (var j = 0; j < size; j++) {
+    for (var j = 0; j < sizeX; j++) {
       if (randomized) {
         var isAlive = Boolean(Math.floor(Math.random() * 2));
         if (isAlive) {

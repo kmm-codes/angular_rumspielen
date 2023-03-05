@@ -7,7 +7,8 @@ import { Component } from '@angular/core';
   styleUrls: ['./golsettings.component.css']
 })
 export class GolsettingsComponent {
-  static fieldSize = 10;
+  static fieldSizeX = 10;
+  static fieldSizeY = 10;
   static refreshIntervalMs = 200;
   somethingClicked() {
 

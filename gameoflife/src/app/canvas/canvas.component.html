@@ -1,12 +1,16 @@
-<canvas height="1000px" width="1000px" #myCanvas id="myCanvas"></canvas>
-<!--table>
-    <tr *ngFor="let row of data; index as rowindex;">
-        <td (click)="toggleField(rowindex, colindex)" *ngFor="let col of row; index as colindex;">
-            <div [ngClass]="{'dead': col === false, 'alive' : col === true }" class="content">
-            </div>
-        </td>
-    </tr>
-</table-->
+<div *ngIf="renderTypeCanvas">
+    <canvas height="1000px" width="1000px" #myCanvas></canvas>
+</div>
+<div *ngIf="renderTypeTable">
+    <table>
+        <tr *ngFor="let row of data; index as rowindex;">
+            <td (click)="toggleField(rowindex, colindex)" *ngFor="let col of row; index as colindex;">
+                <div [ngClass]="{'dead': col === false, 'alive' : col === true }" class="content">
+                </div>
+            </td>
+        </tr>
+    </table>
+</div>
 <hr>
 <div class="container" id="settingsContainer">
     <div class="row top-buffer">
@@ -21,6 +25,11 @@
         </div>
     </div>
     <div class="row top-buffer">
+        <div class="col-6">
+            <button type="button" class="btn btn-primary mybutton" (click)="step()">Step</button>
+        </div>
+    </div>
+    <div class="row top-buffer">
         <div class="col">
             <button type="button" class="btn btn-warning mybutton" (click)="makePlayfield()">Generate random
                 field</button>
@@ -32,15 +41,25 @@
 
     </div>
     <div class="row top-buffer">
-        <label for="inputFieldSize">Feldgröße</label>
+        <label for="inputFieldSize">Feldgröße X</label>
     </div>
     <div class="row">
-        <input [(ngModel)]="fieldSize" type="range" class="form-range" id="inputFieldSize" placeholder="Zahl eingeben"
+        <input [(ngModel)]="fieldSizeX" type="range" class="form-range" id="inputFieldSize" placeholder="Zahl eingeben"
             min="10" max="100">
     </div>
     <div class="row">
-        <div>{{fieldSize}}</div>
+        <div>{{fieldSizeX}}</div>
 
+    </div>
+    <div class="row top-buffer">
+        <label for="inputFieldSize">Feldgröße Y</label>
+    </div>
+    <div class="row">
+        <input [(ngModel)]="fieldSizeY" type="range" class="form-range" id="inputFieldSize" placeholder="Zahl eingeben"
+            min="10" max="100">
+    </div>
+    <div class="row">
+        <div>{{fieldSizeY}}</div>
     </div>
     <div class="row top-buffer">
         <label for="inputUpdateInterval">Aktualisierungsrate in ms</label>
@@ -68,9 +87,26 @@
         </div>
         <div class="col-6">
             <input [(ngModel)]="canvasDrawBorder" type="checkbox" class="checkbox" id="inputCanvasDrawBorder"
-                (change)="drawGridOnCanvas()" placeholder="Zahl eingeben" min="1" max="1000">
+                (change)="drawGridOnCanvas()" min="1" max="1000">
         </div>
     </div>
+    <div class="row top-buffer">
+        <div class="col-6">
+            <label for="inputUpdateInterval">Render Canvas</label>
+        </div>
+        <div class="col-6">
+            <input [(ngModel)]="renderTypeCanvas" type="checkbox" class="checkbox" id="inputCanvasDrawBorder" onchange="drawGridOnCanvas">
+        </div>
+    </div>
+    <div class="row top-buffer">
+        <div class="col-6">
+            <label for="inputUpdateInterval">Render Table</label>
+        </div>
+        <div class="col-6">
+            <input [(ngModel)]="renderTypeTable" type="checkbox" class="checkbox" id="inputCanvasDrawBorder">
+        </div>
+    </div>
+
     <div class="row">
         <br>
     </div>
