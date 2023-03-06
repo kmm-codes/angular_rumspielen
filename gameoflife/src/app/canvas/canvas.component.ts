@@ -18,8 +18,8 @@ export class CanvasComponent implements OnInit, AfterViewInit {
   canvasDrawBorder = true;
   SettingCanvasRectsSpaceBetween = 1;
   canvasRectsSpaceBetween = 1;
-  canvasRectsX = 10;
-  canvasRectsY = 10;
+  canvasRectsX = 1;
+  canvasRectsY = 1;
   canvasHeight = 500;
   canvasWidth = 500;
   running = false;
@@ -125,61 +125,64 @@ export class CanvasComponent implements OnInit, AfterViewInit {
     let killed = 0;
     let born = 0;
     let data = this.data;
-    var newData = this.data.map(function (arr) {
-      return arr.slice();
-    });
-    for (let rowIndex = 0; rowIndex < this.data.length; rowIndex++) {
-      for (let colIndex = 0; colIndex < this.data[0].length; colIndex++) {
-        console.log(`colIndex:${colIndex}, rowIndex:${rowIndex}`)
-        let numNeighbors = 0;
-        //prüfen ob Zelle lebt
-        let cellIsAlive = isAlive(rowIndex, colIndex, data)
-        let cellIsAliveStr = "tot"
-        if (cellIsAlive > 0) {
-          cellIsAliveStr = "lebending"
-        }
+    //var newData = this.data.map(function (arr) {
+    //return arr.slice();
+    //});
+    var newData = [];
 
-        //Zelle links
-        numNeighbors += isAlive(rowIndex, colIndex - 1, data)
-        //Zelle oben links
-        numNeighbors += isAlive(rowIndex - 1, colIndex - 1, data)
-        //Zelle rechts
-        numNeighbors += isAlive(rowIndex, colIndex + 1, data)
-        //Zelle oben rechts
-        numNeighbors += isAlive(rowIndex - 1, colIndex + 1, data)
-        //Zelle oben
-        numNeighbors += isAlive(rowIndex - 1, colIndex, data)
-        //Zelle unten
-        numNeighbors += isAlive(rowIndex + 1, colIndex, data)
-        //Zelle unten links
-        numNeighbors += isAlive(rowIndex + 1, colIndex - 1, data)
-        //Zelle unten rechts
-        numNeighbors += isAlive(rowIndex + 1, colIndex + 1, data)
+    for (var i = 0; i < this.data.length; i++)
+      newData[i] = this.data[i].slice(); for (let rowIndex = 0; rowIndex < this.data.length; rowIndex++) {
+        for (let colIndex = 0; colIndex < this.data[0].length; colIndex++) {
+          //console.log(`colIndex:${colIndex}, rowIndex:${rowIndex}`)
+          let numNeighbors = 0;
+          //prüfen ob Zelle lebt
+          let cellIsAlive = isAlive(rowIndex, colIndex, data)
+          let cellIsAliveStr = "tot"
+          if (cellIsAlive > 0) {
+            cellIsAliveStr = "lebending"
+          }
 
-        if (numNeighbors > 0) {
-          console.log(`Die Zelle ${rowIndex},${colIndex} ist ${cellIsAliveStr} und hat ${numNeighbors} lebende Nachbarn`)
-        } else {
-          //console.log(`Die Zelle ${rowIndex},${colIndex} ist ${cellIsAliveStr} und hat 0 lebende Nachbarn`)
-        }
+          //Zelle links
+          numNeighbors += isAlive(rowIndex, colIndex - 1, data)
+          //Zelle oben links
+          numNeighbors += isAlive(rowIndex - 1, colIndex - 1, data)
+          //Zelle rechts
+          numNeighbors += isAlive(rowIndex, colIndex + 1, data)
+          //Zelle oben rechts
+          numNeighbors += isAlive(rowIndex - 1, colIndex + 1, data)
+          //Zelle oben
+          numNeighbors += isAlive(rowIndex - 1, colIndex, data)
+          //Zelle unten
+          numNeighbors += isAlive(rowIndex + 1, colIndex, data)
+          //Zelle unten links
+          numNeighbors += isAlive(rowIndex + 1, colIndex - 1, data)
+          //Zelle unten rechts
+          numNeighbors += isAlive(rowIndex + 1, colIndex + 1, data)
 
-        //A living cell surrounded by less than 2 living cells will die.
-        if (cellIsAlive && numNeighbors < 2) {
-          newData[rowIndex][colIndex] = false;
-          killed++;
+          if (numNeighbors > 0) {
+            //console.log(`Die Zelle ${rowIndex},${colIndex} ist ${cellIsAliveStr} und hat ${numNeighbors} lebende Nachbarn`)
+          } else {
+            //console.log(`Die Zelle ${rowIndex},${colIndex} ist ${cellIsAliveStr} und hat 0 lebende Nachbarn`)
+          }
+
+          //A living cell surrounded by less than 2 living cells will die.
+          if (cellIsAlive && numNeighbors < 2) {
+            newData[rowIndex][colIndex] = false;
+            killed++;
+          }
+          //A living cell surrounded by more than 3 living cells will also die.
+          if (cellIsAlive && numNeighbors > 3) {
+            newData[rowIndex][colIndex] = false;
+            killed++;
+          }
+          //A dead cell surrounded by 3 living cells will be reborn.
+          if (!cellIsAlive && numNeighbors === 3) {
+            //console.log(`Erwecke Zelle ${rowIndex},${colIndex} zum leben`)
+            newData[rowIndex][colIndex] = true;
+            born++;
+          }
         }
-        //A living cell surrounded by more than 3 living cells will also die.
-        if (cellIsAlive && numNeighbors > 3) {
-          newData[rowIndex][colIndex] = false;
-          killed++;
-        }
-        //A dead cell surrounded by 3 living cells will be reborn.
-        if (!cellIsAlive && numNeighbors === 3) {
-          //console.log(`Erwecke Zelle ${rowIndex},${colIndex} zum leben`)
-          newData[rowIndex][colIndex] = true;
-          born++;
-        }
-      }
-    };
+      };
 
     if (born === 0 && killed === 0) {
       this.running = false;
@@ -227,7 +230,7 @@ export class CanvasComponent implements OnInit, AfterViewInit {
 }
 function isAlive(rowIndex: number, colIndex: number, data: boolean[][]): number {
   //console.log("check isAlive for " + rowIndex + "," + colIndex)
-  if (rowIndex < 0 || colIndex < 0 || rowIndex > data.length - 1 || colIndex > data.length - 1) {
+  if (rowIndex < 0 || colIndex < 0 || rowIndex > data.length - 1 || colIndex > data[0].length - 1) {
     //console.log("out of bounds")
     return 0;
   }
