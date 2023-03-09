@@ -40,3 +40,7 @@ testem.log
 # System files
 .DS_Store
 Thumbs.db
+tour-of-heroes/.angular
+tour-of-heroes/.vscode
+tour-of-heroes/node_modules/.bin
+tour-of-heroes/node_modules
